@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sizzling Hot - Slot Machine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Orbitron', monospace;
+            background: linear-gradient(135deg, #8B0000, #FF4500, #FF6347);
+            background-size: 400% 400%;
+            animation: gradientShift 8s ease infinite;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+        }
+        
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        .game-container {
+            background: linear-gradient(145deg, #2C1810, #1A0F08);
+            border: 4px solid #FFD700;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.3), inset 0 0 30px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 90%;
+        }
+        
+        .title {
+            text-align: center;
+            color: #FFD700;
+            font-size: 3em;
+            font-weight: 900;
+            text-shadow: 0 0 20px #FF4500, 0 0 40px #FF6347;
+            margin-bottom: 20px;
+            animation: pulse 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes pulse {
+            from { text-shadow: 0 0 20px #FF4500, 0 0 40px #FF6347; }
+            to { text-shadow: 0 0 30px #FF4500, 0 0 60px #FF6347, 0 0 80px #FFD700; }
+        }
+        
+        .slot-machine {
+            background: linear-gradient(145deg, #000, #333);
+            border: 3px solid #FFD700;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: inset 0 0 20px rgba(255, 215, 0, 0.2);
+        }
+        
+        .slot-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+        }
+        
+        .slot-cell {
+            background: linear-gradient(145deg, #FFD700, #FFA500);
+            border: 2px solid #FF4500;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            height: 80px;
+            width: 80px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            animation: slotSpin 0.5s ease-out;
+        }
+        
+        @keyframes slotSpin {
+            0% { transform: rotateY(0deg); }
+            50% { transform: rotateY(180deg); }
+            100% { transform: rotateY(0deg); }
+        }
+        
+        .slot-cell.winning {
+            animation: winPulse 1s ease-in-out infinite alternate;
+            box-shadow: 0 0 20px #FFD700, 0 0 40px #FF4500;
+        }
+        
+        @keyframes winPulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.1); }
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .info-panel {
+            background: linear-gradient(145deg, #1A1A1A, #333);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            padding: 15px;
+            color: #FFD700;
+            font-weight: 700;
+            text-align: center;
+            min-width: 120px;
+        }
+        
+        .button {
+            background: linear-gradient(145deg, #FF4500, #FF6347);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            color: #FFD700;
+            font-family: 'Orbitron', monospace;
+            font-weight: 700;
+            font-size: 1.1em;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+        
+        .button:hover {
+            background: linear-gradient(145deg, #FF6347, #FF4500);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .button:active {
+            transform: translateY(0);
+        }
+        
+        .button:disabled {
+            background: #666;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        
+        .spin-button {
+            font-size: 1.5em;
+            padding: 15px 30px;
+            animation: spinGlow 2s ease-in-out infinite alternate;
+        }
+        
+        @keyframes spinGlow {
+            from { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); }
+            to { box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 0 20px #FFD700; }
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+        
+        .modal-content {
+            background: linear-gradient(145deg, #2C1810, #1A0F08);
+            border: 4px solid #FFD700;
+            border-radius: 15px;
+            margin: 15% auto;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            text-align: center;
+            color: #FFD700;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+        
+        .modal h2 {
+            margin-bottom: 20px;
+            font-size: 2em;
+            text-shadow: 0 0 10px #FF4500;
+        }
+        
+        .input-group {
+            margin: 15px 0;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 700;
+        }
+        
+        .input-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #FFD700;
+            border-radius: 5px;
+            background: #333;
+            color: #FFD700;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.1em;
+        }
+        
+        .double-down-panel {
+            display: none;
+            background: linear-gradient(145deg, #1A1A1A, #333);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+            color: #FFD700;
+        }
+        
+        .cards-history {
+            margin: 15px 0;
+            font-size: 1.5em;
+        }
+        
+        .win-message {
+            display: none;
+            background: linear-gradient(145deg, #228B22, #32CD32);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 15px 0;
+            color: #FFD700;
+            font-weight: 700;
+            text-align: center;
+            animation: winFlash 1s ease-in-out infinite alternate;
+        }
+        
+        @keyframes winFlash {
+            from { background: linear-gradient(145deg, #228B22, #32CD32); }
+            to { background: linear-gradient(145deg, #32CD32, #228B22); }
+        }
+        
+        @media (max-width: 768px) {
+            .title { font-size: 2em; }
+            .slot-cell { font-size: 2em; height: 60px; width: 60px; }
+            .controls { flex-direction: column; }
+            .game-container { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1 class="title">🔥 SIZZLING HOT 🔥</h1>
+        
+        <div class="slot-machine">
+            <div class="slot-grid" id="slotGrid">
+                <!-- 15 slots will be generated by JavaScript -->
+            </div>
+        </div>
+        
+        <div class="controls">
+            <div class="info-panel">
+                <div>Budget</div>
+                <div id="budget">0</div>
+            </div>
+            <div class="info-panel">
+                <div>Bet</div>
+                <div id="bet">10</div>
+            </div>
+            <div class="info-panel">
+                <div>Prize</div>
+                <div id="prize">0</div>
+            </div>
+            <button class="button spin-button" id="spinButton" onclick="spin()">🎰 SPIN 🎰</button>
+            <button class="button" id="setupButton" onclick="showSetup()">⚙️ SETUP</button>
+        </div>
+        
+        <div class="win-message" id="winMessage"></div>
+        
+        <div class="double-down-panel" id="doubleDownPanel">
+            <h3>🃏 DOUBLE DOWN 🃏</h3>
+            <div class="cards-history" id="cardsHistory"></div>
+            <div style="margin: 20px 0;">
+                <button class="button" onclick="doubleDown('rosie')">❤️ ROSIE ♦️</button>
+                <button class="button" onclick="doubleDown('neagra')">♠️ NEAGRA ♣️</button>
+                <button class="button" onclick="collectPrize()">💰 COLLECT</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Setup Modal -->
+    <div id="setupModal" class="modal">
+        <div class="modal-content">
+            <h2>🎰 Game Setup 🎰</h2>
+            <div class="input-group">
+                <label for="budgetInput">Budget:</label>
+                <input type="number" id="budgetInput" min="1" value="100">
+            </div>
+            <div class="input-group">
+                <label for="betInput">Bet per Spin:</label>
+                <input type="number" id="betInput" min="1" value="10">
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="button" onclick="startGame()">🚀 START GAME</button>
+                <button class="button" onclick="closeSetup()">❌ CANCEL</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPrize = 0;
+        let gameState = {
+            budget: 0,
+            bet: 10,
+            spinning: false
+        };
+
+        // Initialize the slot grid
+        function initializeGrid() {
+            const grid = document.getElementById('slotGrid');
+            grid.innerHTML = '';
+            for (let i = 0; i < 15; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'slot-cell';
+                cell.id = `slot-${i}`;
+                cell.textContent = '❓';
+                grid.appendChild(cell);
+            }
+        }
+
+        // Show setup modal
+        function showSetup() {
+            document.getElementById('setupModal').style.display = 'block';
+        }
+
+        // Close setup modal
+        function closeSetup() {
+            document.getElementById('setupModal').style.display = 'none';
+        }
+
+        // Start the game with budget and bet
+        async function startGame() {
+            const budget = parseInt(document.getElementById('budgetInput').value);
+            const bet = parseInt(document.getElementById('betInput').value);
+            
+            if (budget < bet) {
+                alert('Budget must be greater than or equal to bet!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/set_budget', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ budget, bet })
+                });
+                
+                if (response.ok) {
+                    gameState.budget = budget;
+                    gameState.bet = bet;
+                    updateDisplay();
+                    closeSetup();
+                }
+            } catch (error) {
+                console.error('Error setting up game:', error);
+            }
+        }
+
+        // Spin the slot machine
+        async function spin() {
+            if (gameState.spinning || gameState.budget < gameState.bet) {
+                return;
+            }
+            
+            gameState.spinning = true;
+            document.getElementById('spinButton').disabled = true;
+            hideMessages();
+            
+            // Animate spinning
+            animateSpinning();
+            
+            try {
+                const response = await fetch('/spin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.error) {
+                    alert(result.error);
+                    return;
+                }
+                
+                // Update display after animation
+                setTimeout(() => {
+                    updateSlotDisplay(result.hand);
+                    gameState.budget = result.budget;
+                    currentPrize = result.prize;
+                    updateDisplay();
+                    
+                    if (result.multiplier > 0) {
+                        showWinMessage(result.multiplier, result.prize);
+                        showDoubleDownOption();
+                    }
+                    
+                    gameState.spinning = false;
+                    document.getElementById('spinButton').disabled = false;
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Error spinning:', error);
+                gameState.spinning = false;
+                document.getElementById('spinButton').disabled = false;
+            }
+        }
+
+        // Animate spinning effect
+        function animateSpinning() {
+            const symbols = ["7", "🍉", "🍋", "🍇", "🍒", "⭐", "🟣", "🍊"];
+            let animationCount = 0;
+            const maxAnimations = 15;
+            
+            const interval = setInterval(() => {
+                for (let i = 0; i < 15; i++) {
+                    const cell = document.getElementById(`slot-${i}`);
+                    cell.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    cell.style.animation = 'slotSpin 0.1s ease-out';
+                }
+                
+                animationCount++;
+                if (animationCount >= maxAnimations) {
+                    clearInterval(interval);
+                }
+            }, 100);
+        }
+
+        // Update slot display with final results
+        function updateSlotDisplay(hand) {
+            for (let i = 0; i < 15; i++) {
+                const cell = document.getElementById(`slot-${i}`);
+                cell.textContent = hand[i];
+                cell.style.animation = '';
+            }
+        }
+
+        // Show win message
+        function showWinMessage(multiplier, prize) {
+            const winMessage = document.getElementById('winMessage');
+            winMessage.textContent = `🎉 WIN! x${multiplier} - Prize: ${prize} 🎉`;
+            winMessage.style.display = 'block';
+        }
+
+        // Show double down option
+        function showDoubleDownOption() {
+            document.getElementById('doubleDownPanel').style.display = 'block';
+        }
+
+        // Hide messages
+        function hideMessages() {
+            document.getElementById('winMessage').style.display = 'none';
+            document.getElementById('doubleDownPanel').style.display = 'none';
+        }
+
+        // Double down game
+        async function doubleDown(choice) {
+            try {
+                const response = await fetch('/double_down', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ choice, prize: currentPrize })
+                });
+                
+                const result = await response.json();
+                
+                if (result.won) {
+                    currentPrize = result.new_prize;
+                    document.getElementById('prize').textContent = currentPrize;
+                    alert(`🎉 You won! Card: ${result.card}. New prize: ${currentPrize}`);
+                } else {
+                    currentPrize = 0;
+                    document.getElementById('prize').textContent = 0;
+                    alert(`😞 You lost! Card: ${result.card}. Prize lost.`);
+                    hideMessages();
+                }
+                
+                // Update cards history
+                updateCardsHistory(result.cards_dealt);
+                
+            } catch (error) {
+                console.error('Error in double down:', error);
+            }
+        }
+
+        // Collect prize
+        async function collectPrize() {
+            try {
+                const response = await fetch('/collect_prize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ prize: currentPrize })
+                });
+                
+                const result = await response.json();
+                gameState.budget = result.budget;
+                currentPrize = 0;
+                updateDisplay();
+                hideMessages();
+                
+            } catch (error) {
+                console.error('Error collecting prize:', error);
+            }
+        }
+
+        // Update cards history display
+        function updateCardsHistory(cards) {
+            const historyElement = document.getElementById('cardsHistory');
+            if (cards && cards.length > 0) {
+                historyElement.textContent = `Previous cards: ${cards.join(' ')}`;
+            } else {
+                historyElement.textContent = 'No cards dealt yet';
+            }
+        }
+
+        // Update display
+        function updateDisplay() {
+            document.getElementById('budget').textContent = gameState.budget;
+            document.getElementById('bet').textContent = gameState.bet;
+            document.getElementById('prize').textContent = currentPrize;
+        }
+
+        // Initialize game on page load
+        window.onload = function() {
+            initializeGrid();
+            showSetup();
+        };
+    </script>
+</body>
+</html>
